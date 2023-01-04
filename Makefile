@@ -3,7 +3,7 @@ proto:
 	protoc pkg/pb/*.proto --go-grpc_out=.
 	go mod tidy
 
-postgres docker:
+postgres_docker:
 	docker run --name postgres-db -e POSTGRES_PASSWORD=aklpidor -d postgres 
 
 server:
