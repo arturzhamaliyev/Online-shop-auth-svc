@@ -38,7 +38,7 @@ message LoginResponse {
 // Validate
 
 message ValidateRequest {
-    string token = 1; 
+  string token = 1; 
 }
 
 message ValidateResponse {

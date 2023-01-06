@@ -1,10 +1,20 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"fmt"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
-	Port         string `mapstructure:"PORT"`
-	DBUrl        string `mapstructure:"DB_URL"`
+	Port string `mapstructure:"PORT"`
+	// DB   struct {
+	DB_HOST     string `mapstructure:"DB_HOST"`
+	DB_PORT     string `mapstructure:"DB_PORT"`
+	DB_USER     string `mapstructure:"DB_USER"`
+	DB_PASSWORD string `mapstructure:"DB_PASSWORD"`
+	DB_NAME     string `mapstructure:"DB_NAME"`
+	// }/
 	JWTSecretKey string `mapstructure:"JWT_SECRET_KEY"`
 }
 
@@ -26,5 +36,6 @@ func LoadConfig() (*Config, error) {
 		return nil, err
 	}
 
+	fmt.Println(config)
 	return config, nil
 }

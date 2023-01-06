@@ -5,6 +5,7 @@ services:
     ports:
       - 5432:5432
     environment:
+      - POSTGRES_DB=auth_svc
       - POSTGRES_PASSWORD=aklpidor
     volumes:
       - postgres-data:/var/lib/postgresql/data
