@@ -27,25 +27,18 @@ func (r *Repository) GetByEmail(ctx context.Context, email string) error {
 
 	row := r.H.DB.QueryRow(ctx, st.SQL, email)
 
-	// row := st.QueryRowContext(ctx, email)
-
 	var id uint64
 	return row.Scan(&id)
 }
 
 func (r *Repository) Create(ctx context.Context, user models.User) error {
 	query := `INSERT INTO users (email,password) VALUES ($1,$2)`
-	fmt.Println(1)
 
 	st, err := r.H.DB.Prepare(ctx, "creating user", query)
-	// st, err := r.H.DB.PrepareContext(ctx, query)
 	if err != nil {
 		return err
 	}
-	fmt.Println(1)
-	// defer st.Close()
 
 	_, err = r.H.DB.Exec(ctx, st.SQL, user.Email, user.Password)
-	// _, err = st.ExecContext(ctx, user.Email, user.Password)
 	return err
 }
