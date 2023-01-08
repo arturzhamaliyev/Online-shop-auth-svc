@@ -14,7 +14,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-// TODO: database migration
 // TODO: swagger connection
 
 func main() {
@@ -29,9 +28,9 @@ func main() {
 	}
 	defer h.DB.Close(context.Background())
 
-	repo := repository.NewAuthRepository(h)
+	repos := repository.NewAuthRepository(h)
 
-	authServer := services.NewAuthServer(repo)
+	authServer := services.NewAuthServiceServer(repos)
 
 	grpcServer := grpc.NewServer()
 
@@ -42,7 +41,7 @@ func main() {
 		log.Fatalln("Failed to listing:", err)
 	}
 
-	fmt.Println("Server is ready to accept clients on port :50051")
+	fmt.Printf("Server is ready to accept clients on port %s\n", c.Port)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalln("Failed to serve:", err)

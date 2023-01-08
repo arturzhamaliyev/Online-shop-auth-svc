@@ -12,17 +12,17 @@ import (
 
 type Server struct {
 	pb.UnimplementedAuthServiceServer
-	Repo *repository.Repository
+	repo repository.Auth
 }
 
-func NewAuthServer(repo *repository.Repository) *Server {
-	return &Server{Repo: repo}
+func NewAuthServiceServer(repo repository.Auth) *Server {
+	return &Server{repo: repo}
 }
 
 func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	var user models.User
 
-	if err := s.Repo.GetByEmail(ctx, req.Email); err == nil {
+	if err := s.repo.GetByEmail(ctx, req.Email); err == nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusConflict,
 			Error:  "email already exists",
@@ -32,7 +32,7 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 	user.Email = req.Email
 	user.Password = utils.HashPassword(req.Password)
 
-	if err := s.Repo.Create(ctx, user); err != nil {
+	if err := s.repo.Create(ctx, user); err != nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
