@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/config"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/config"
 	"github.com/jackc/pgx/v5"
 )
 

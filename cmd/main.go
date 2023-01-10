@@ -6,11 +6,11 @@ import (
 	"log"
 	"net"
 
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/config"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/db"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/pb"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/repository"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/services"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/config"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/db"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/pb"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/repository"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/services"
 	"google.golang.org/grpc"
 )
 

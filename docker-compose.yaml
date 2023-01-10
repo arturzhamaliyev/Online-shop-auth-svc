@@ -3,9 +3,11 @@ services:
   auth-svc:
     image: online-shop-auth-svc
     build: .
-    command: go run cmd/main.go
+    command: air --build.cmd "go build -o bin/api cmd/main.go" --build.bin "./bin/api"
     ports:
       - 50051:50051
+    volumes:
+      - .:/usr/src/app
 
   postgreSQL:
     image: postgres

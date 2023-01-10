@@ -2,15 +2,14 @@ package repository
 
 import (
 	"context"
-	"fmt"
 
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/db"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/models"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/db"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/models"
 )
 
 type Auth interface {
 	GetByEmail(ctx context.Context, email string) error
-	Create(ctx context.Context, user models.User) error
+	Create(ctx context.Context, user models.User) (int64, error)
 }
 
 type repository struct {
@@ -28,7 +27,7 @@ func (r *repository) GetByEmail(ctx context.Context, email string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(st)
+	// fmt.Println(st)
 
 	row := r.h.DB.QueryRow(ctx, st.SQL, email)
 
@@ -36,14 +35,21 @@ func (r *repository) GetByEmail(ctx context.Context, email string) error {
 	return row.Scan(&id)
 }
 
-func (r *repository) Create(ctx context.Context, user models.User) error {
-	query := `INSERT INTO users (email,password) VALUES ($1,$2)`
+func (r *repository) Create(ctx context.Context, user models.User) (int64, error) {
+	query := `INSERT INTO users (email,password) VALUES ($1,$2) RETURNING id`
 
 	st, err := r.h.DB.Prepare(ctx, "creating user", query)
 	if err != nil {
-		return err
+		return 0, err
 	}
 
-	_, err = r.h.DB.Exec(ctx, st.SQL, user.Email, user.Password)
-	return err
+	row := r.h.DB.QueryRow(ctx, st.SQL, user.Email, user.Password)
+
+	var id int64
+	err = row.Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+
+	return id, nil
 }

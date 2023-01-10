@@ -4,10 +4,10 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/models"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/pb"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/repository"
-	"github.com/arturzhamaliyev/Online-shop-auth-svc/pkg/utils"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/models"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/pb"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/repository"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/utils"
 )
 
 type Server struct {
@@ -22,7 +22,8 @@ func NewAuthServiceServer(repo repository.Auth) *Server {
 func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	var user models.User
 
-	if err := s.repo.GetByEmail(ctx, req.Email); err == nil {
+	err := s.repo.GetByEmail(ctx, req.Email)
+	if err == nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusConflict,
 			Error:  "email already exists",
@@ -32,7 +33,8 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 	user.Email = req.Email
 	user.Password = utils.HashPassword(req.Password)
 
-	if err := s.repo.Create(ctx, user); err != nil {
+	user.Id, err = s.repo.Create(ctx, user)
+	if err != nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
@@ -40,6 +42,7 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 	}
 
 	return &pb.RegisterResponse{
+		Id:     user.Id,
 		Status: http.StatusCreated,
 	}, nil
 }
