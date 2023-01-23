@@ -3,6 +3,7 @@ module github.com/arturzhamaliyev/Online-shop-auth-svc
 go 1.19
 
 require (
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/jackc/pgx/v5 v5.2.0
 	github.com/spf13/viper v1.14.0
 	golang.org/x/crypto v0.0.0-20220829220503-c86fa9a7ed90

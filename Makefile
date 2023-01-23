@@ -3,10 +3,10 @@ proto:
 	protoc internal/pb/*.proto --go-grpc_out=.
 	go mod tidy
 
-docker-compose_up:
+doc-c_u:
 	docker-compose -f docker-compose.yaml up --build
 
-docker-compose_down:
+doc-c_d:
 	docker-compose -f docker-compose.yaml down
 
 server:

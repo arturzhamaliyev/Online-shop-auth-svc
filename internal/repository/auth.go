@@ -8,7 +8,7 @@ import (
 )
 
 type Auth interface {
-	GetByEmail(ctx context.Context, email string) error
+	GetByEmail(ctx context.Context, email string) (*models.User, error)
 	Create(ctx context.Context, user models.User) (int64, error)
 }
 
@@ -20,19 +20,22 @@ func NewAuthRepository(h db.Handler) Auth {
 	return &repository{h: h}
 }
 
-func (r *repository) GetByEmail(ctx context.Context, email string) error {
-	query := `SELECT id FROM users WHERE email = $1`
+func (r *repository) GetByEmail(ctx context.Context, email string) (*models.User, error) {
+	query := `SELECT * FROM users WHERE email = $1`
 
 	st, err := r.h.DB.Prepare(ctx, "getByEmail", query)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	// fmt.Println(st)
 
 	row := r.h.DB.QueryRow(ctx, st.SQL, email)
 
-	var id uint64
-	return row.Scan(&id)
+	var user models.User
+	if err := row.Scan(&user.Id, &user.Email, &user.Password); err != nil {
+		return nil, err
+	}
+
+	return &user, nil
 }
 
 func (r *repository) Create(ctx context.Context, user models.User) (int64, error) {

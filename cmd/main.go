@@ -14,8 +14,6 @@ import (
 	"google.golang.org/grpc"
 )
 
-// TODO: swagger connection
-
 func main() {
 	c, err := config.LoadConfig()
 	if err != nil {
@@ -36,12 +34,12 @@ func main() {
 
 	pb.RegisterAuthServiceServer(grpcServer, authServer)
 
-	lis, err := net.Listen("tcp", c.Port)
+	lis, err := net.Listen("tcp", ":"+c.Port)
 	if err != nil {
 		log.Fatalln("Failed to listing:", err)
 	}
 
-	fmt.Printf("Server is ready to accept clients on port %s\n", c.Port)
+	fmt.Printf("Server is ready to accept clients on port :%s\n", c.Port)
 
 	if err := grpcServer.Serve(lis); err != nil {
 		log.Fatalln("Failed to serve:", err)

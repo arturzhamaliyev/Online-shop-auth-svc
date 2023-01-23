@@ -5,14 +5,14 @@ services:
     build: .
     command: air --build.cmd "go build -o bin/api cmd/main.go" --build.bin "./bin/api"
     ports:
-      - 50051:50051
+      - "127.0.0.1:50051:50051"
     volumes:
       - .:/usr/src/app
 
   postgreSQL:
     image: postgres
     ports:
-      - 5432:5432
+      - "127.0.0.1:5432:5432"
     environment:
       - POSTGRES_USER=auth_svc
       - POSTGRES_PASSWORD=aklpidor

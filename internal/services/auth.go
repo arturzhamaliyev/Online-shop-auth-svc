@@ -2,17 +2,20 @@ package services
 
 import (
 	"context"
+	"errors"
 	"net/http"
 
 	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/models"
 	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/pb"
 	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/repository"
 	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/utils"
+	"github.com/jackc/pgx/v5"
 )
 
 type Server struct {
 	pb.UnimplementedAuthServiceServer
 	repo repository.Auth
+	Jwt  utils.JwtWrapper
 }
 
 func NewAuthServiceServer(repo repository.Auth) *Server {
@@ -22,7 +25,7 @@ func NewAuthServiceServer(repo repository.Auth) *Server {
 func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
 	var user models.User
 
-	err := s.repo.GetByEmail(ctx, req.Email)
+	_, err := s.repo.GetByEmail(ctx, req.Email)
 	if err == nil {
 		return &pb.RegisterResponse{
 			Status: http.StatusConflict,
@@ -47,8 +50,34 @@ func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.Reg
 	}, nil
 }
 
-func (s *Server) Login(context.Context, *pb.LoginRequest) (*pb.LoginResponse, error) {
-	return nil, nil
+func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+	user, err := s.repo.GetByEmail(ctx, req.Email)
+	if err != nil {
+		status := http.StatusInternalServerError
+		errText := "couldn't make getbyemail"
+		if errors.Is(err, pgx.ErrNoRows) {
+			status = http.StatusNotFound
+			errText = "user not found"
+		}
+		return &pb.LoginResponse{
+			Status: int64(status),
+			Error:  errText,
+		}, nil
+	}
+
+	if match := utils.CheckPasswordHash(req.Password, user.Password); !match {
+		return &pb.LoginResponse{
+			Status: http.StatusNotFound,
+			Error:  "user not found",
+		}, nil
+	}
+
+	token, _ := s.Jwt.GenerateToken(*user)
+
+	return &pb.LoginResponse{
+		Status: http.StatusOK,
+		Token:  token,
+	}, nil
 }
 
 func (s *Server) Validate(context.Context, *pb.ValidateRequest) (*pb.ValidateResponse, error) {
