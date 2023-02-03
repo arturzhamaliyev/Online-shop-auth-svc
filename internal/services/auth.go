@@ -18,8 +18,11 @@ type Server struct {
 	Jwt  utils.JwtWrapper
 }
 
-func NewAuthServiceServer(repo repository.Auth) *Server {
-	return &Server{repo: repo}
+func NewAuthServiceServer(repo repository.Auth, jwt utils.JwtWrapper) *Server {
+	return &Server{
+		repo: repo,
+		Jwt:  jwt,
+	}
 }
 
 func (s *Server) Register(ctx context.Context, req *pb.RegisterRequest) (*pb.RegisterResponse, error) {
@@ -80,6 +83,31 @@ func (s *Server) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResp
 	}, nil
 }
 
-func (s *Server) Validate(context.Context, *pb.ValidateRequest) (*pb.ValidateResponse, error) {
-	return nil, nil
+func (s *Server) Validate(ctx context.Context, req *pb.ValidateRequest) (*pb.ValidateResponse, error) {
+	claims, err := s.Jwt.ValidateToken(req.Token)
+	if err != nil {
+		return &pb.ValidateResponse{
+			Status: http.StatusBadRequest,
+			Error:  err.Error(),
+		}, nil
+	}
+
+	user, err := s.repo.GetByEmail(ctx, claims.Email)
+	if err != nil {
+		status := http.StatusInternalServerError
+		errText := "couldn't make getbyemail"
+		if errors.Is(err, pgx.ErrNoRows) {
+			status = http.StatusNotFound
+			errText = "user not found"
+		}
+		return &pb.ValidateResponse{
+			Status: int64(status),
+			Error:  errText,
+		}, nil
+	}
+
+	return &pb.ValidateResponse{
+		Status: http.StatusOK,
+		UserId: user.Id,
+	}, nil
 }

@@ -11,6 +11,7 @@ import (
 	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/pb"
 	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/repository"
 	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/services"
+	"github.com/arturzhamaliyev/Online-shop-auth-svc/internal/utils"
 	"google.golang.org/grpc"
 )
 
@@ -28,7 +29,13 @@ func main() {
 
 	repos := repository.NewAuthRepository(h)
 
-	authServer := services.NewAuthServiceServer(repos)
+	jwt := utils.JwtWrapper{
+		SecretKey:      c.JWTSecretKey,
+		Issuer:         "go-grpc-auth-svc",
+		ExpirationTime: 24 * 30,
+	}
+
+	authServer := services.NewAuthServiceServer(repos, jwt)
 
 	grpcServer := grpc.NewServer()
 
